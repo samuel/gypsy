@@ -25,9 +25,9 @@ packages, data_files = [], []
 root_dir = os.path.dirname(__file__)
 if root_dir != '':
     os.chdir(root_dir)
-django_dir = 'gypsy'
+gypsy_dir = 'gypsy'
 
-for dirpath, dirnames, filenames in os.walk(django_dir):
+for dirpath, dirnames, filenames in os.walk(gypsy_dir):
     # Ignore dirnames that start with '.'
     for i, dirname in enumerate(dirnames):
         if dirname.startswith('.'): del dirnames[i]
