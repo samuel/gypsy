@@ -1,0 +1,1 @@
+"""Only exists so storage can be an app in Django so tests run."""
