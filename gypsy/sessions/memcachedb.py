@@ -21,7 +21,12 @@ class SessionStore(SessionBase):
         super(SessionStore, self).__init__(session_key)
 
     def load(self):
-        session_data = self._conn.get(self.session_key)
+        # Hack to force a reconnect if there are dead connections
+        for i in range(2):
+            session_data = self._conn.get(self.session_key)
+            if session_data:
+                break
+            self._conn.forget_dead_hosts()
         if session_data is not None:
             return session_data['data']
         self.create()
@@ -49,7 +54,7 @@ class SessionStore(SessionBase):
             data = self._get_session(no_load=must_create),
             expires = self.get_expiry_age(),
         )
-        result = func(self.session_key, data, self.get_expiry_age())
+        result = func(self.session_key, data) #, self.get_expiry_age())
         if must_create and not result:
             raise CreateError
 
