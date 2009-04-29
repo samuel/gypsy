@@ -17,16 +17,11 @@ class SessionStore(SessionBase):
             if ':' not in host:
                 host = '%s:%d' % (host, DEFAULT_PORT)
             servers.append(host)
-        self._conn = memcache.Client(servers)
+        self._conn = memcache.Client(servers, memcachedb=True)
         super(SessionStore, self).__init__(session_key)
 
     def load(self):
-        # Hack to force a reconnect if there are dead connections
-        for i in range(2):
-            session_data = self._conn.get(self.session_key)
-            if session_data:
-                break
-            self._conn.forget_dead_hosts()
+        session_data = self._conn.get(self.session_key)
         if session_data is not None:
             return session_data['data']
         self.create()
