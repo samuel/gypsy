@@ -38,7 +38,7 @@ for dirpath, dirnames, filenames in os.walk(gypsy_dir):
 
 setup(
     name = 'gypsy',
-    version = '1.0.5',
+    version = '1.0.6',
     description = 'Django extensions by Lefora',
     author = 'Lefora',
     author_email = 'samuel@lefora.com',

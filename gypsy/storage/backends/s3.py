@@ -14,6 +14,7 @@ The Content object passed to save can include the following attributes:
     backend_headers = Dictionary of optional HTTP headers
 """
 
+import logging
 from time import sleep
 from urllib import quote
 from httplib import BadStatusLine
@@ -52,7 +53,7 @@ class S3File(File):
     def __init__(self, bucket, name):
         self._bucket = bucket
         self._name = name
-        self._key = Key(bucket=bucket, name=name)
+        self._key = Key(bucket=bucket, name=name.encode('utf-8'))
         self._pos = 0
 
     @property
@@ -139,7 +140,7 @@ class S3Storage(Storage):
         else:
             public = self.public if public is None else public
 
-        key = Key(self.bucket, name)
+        key = Key(self.bucket, name.encode('utf-8'))
         key.content_type = mimetype
         headers = getattr(content, 'backend_headers', {})
 
@@ -159,10 +160,11 @@ class S3Storage(Storage):
 
             # Make sure file actually exists on S3
             # TODO: Maybe only do this if not settings the acl as that should have the same effect?
-            success = bool(retry(self.bucket.lookup, name))
-
+            success = bool(retry(self.bucket.lookup, name.encode('utf-8')))
             if success:
                 break
+
+            logging.warning(u"Failed to write to S3: %s" % name)
 
         if not success:
             raise Exception("Failed to write file '%s'" % name)
@@ -176,10 +178,10 @@ class S3Storage(Storage):
     #     return name
 
     def delete(self, name):
-        return retry(self.bucket.delete_key, name)
+        return retry(self.bucket.delete_key, name.encode('utf-8'))
 
     def exists(self, name):
-        return bool(retry(self.bucket.lookup, name))
+        return bool(retry(self.bucket.lookup, name.encode('utf-8')))
 
     # def size(self, name):
     #     pass
@@ -193,18 +195,18 @@ class S3Storage(Storage):
 
     def url(self, name, expires_in=None):
         if expires_in or self.url_timeout:
-            key = Key(self.bucket, name)
+            key = Key(self.bucket, name.encode('utf-8'))
             url = retry(key.generate_url, expires_in=expires_in or self.url_timeout)
         else:
             if self.cname:
                 url = "http://%s/%s" % (
                     self.bucket.name,
-                    quote(name))
+                    quote(name.encode('utf-8')))
             else:
                 url = "%s://%s/%s/%s" % (
                     self.conn.protocol,
                     self.conn.server_name,
-                    self.bucket_name, quote(name))
+                    self.bucket_name, quote(name.encode('utf-8')))
                 url = url.replace('https://', 'http://').replace(':443/', '/')
         if url:
             url = url.replace(':80/', '/')
