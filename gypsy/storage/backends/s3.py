@@ -140,9 +140,7 @@ class S3Storage(Storage):
         else:
             public = self.public if public is None else public
 
-        name = quote(name.encode('utf-8'))
-
-        key = Key(self.bucket, name)
+        key = Key(self.bucket, name.encode('utf-8'))
         key.content_type = mimetype
         headers = getattr(content, 'backend_headers', {})
 
