@@ -103,7 +103,7 @@ class S3File(File):
 
     def read(self, num_bytes=None):
         if not self._open:
-            self._key.open(self.mode)
+            self._key.open(self._mode)
             self._open = True
         data = self._key.read(num_bytes)
         self._pos += len(data)
