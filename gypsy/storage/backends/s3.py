@@ -55,6 +55,9 @@ class S3File(File):
         self._name = name
         self._key = Key(bucket=bucket, name=name.encode('utf-8'))
         self._pos = 0
+        self._open = False
+        self._fake_open = False
+        self._mode = 'r'
 
     @property
     def name(self):
@@ -66,7 +69,7 @@ class S3File(File):
 
     @property
     def closed(self):
-        return self._key.closed
+        return self._fake_open
 
     def size():
         doc = "The size property."
@@ -77,11 +80,15 @@ class S3File(File):
         return locals()
 
     def open(self, mode="r"):
-        mode = (mode or 'r')[0]
-        self._key.open(mode)
+        self.close()
+        self._mode = (mode or 'r')[0]
+        self._fake_open = True
 
     def close(self):
-        self._key.close()
+        if self._open:
+            self._pos = 0
+            self._key.close()
+        self._fake_open = False
 
     def seek(self, position):
         if position != 0:
@@ -95,6 +102,9 @@ class S3File(File):
         return self._pos
 
     def read(self, num_bytes=None):
+        if not self._open:
+            self._key.open(self.mode)
+            self._open = True
         data = self._key.read(num_bytes)
         self._pos += len(data)
         return data
