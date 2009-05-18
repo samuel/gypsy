@@ -218,6 +218,8 @@ class S3Storage(Storage):
                     self.conn.server_name,
                     self.bucket_name, quote(name.encode('utf-8')))
                 url = url.replace('https://', 'http://').replace(':443/', '/')
-        if url:
+        if url and url.startswith('http://'):
             url = url.replace(':80/', '/')
+        elif url and url.startswith('https://'):
+            url = url.replace(':443/', '/')
         return url
