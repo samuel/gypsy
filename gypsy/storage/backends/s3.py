@@ -120,7 +120,7 @@ class S3File(File):
 
 
 class S3Storage(Storage):
-    def __init__(self, bucket=None, api_key=None, secret_key=None, url_timeout=None, cname=None, public=None):
+    def __init__(self, bucket=None, api_key=None, secret_key=None, url_timeout=None, cname=None, public=None, overwrite=None):
         self.api_key = api_key or settings.STORAGE_S3['API_KEY']
         self.secret_key = secret_key or settings.STORAGE_S3['SECRET_KEY']
 
@@ -128,6 +128,7 @@ class S3Storage(Storage):
         self.bucket_name = bucket or settings.STORAGE_S3['BUCKET']
         self.url_timeout = url_timeout or settings.STORAGE_S3.get('URL_TIMEOUT')
         self.cname = cname if cname is not None else settings.STORAGE_S3.get('CNAME', False)
+        self.overwrite = overwrite if overwrite is not None else settings.STORAGE_S3.get('OVERWRITE', False)
 
         self.conn = S3Connection(self.api_key, self.secret_key)
 
@@ -186,6 +187,11 @@ class S3Storage(Storage):
     #     if isinstance(name, unicode):
     #         name = name.encode('utf-8')
     #     return name
+
+    def get_available_name(self, name):
+        if self.overwrite:
+            return name
+        return super(S3Storage, self).get_available_name(name)
 
     def delete(self, name):
         return retry(self.bucket.delete_key, name.encode('utf-8'))
