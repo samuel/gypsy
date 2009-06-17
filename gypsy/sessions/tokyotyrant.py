@@ -1,3 +1,4 @@
+import time
 import pytyrant
 from django.conf import settings
 from django.contrib.sessions.backends.base import SessionBase, CreateError
@@ -16,7 +17,11 @@ class SessionStore(SessionBase):
         except KeyError:
             self.create()
             return {}
-        return session_data['data']
+
+        if int(session_data['expires']) < time.time():
+            return {}
+            
+        return self.decode(session_data['data'])
 
     def create(self):
         while True:
@@ -31,8 +36,8 @@ class SessionStore(SessionBase):
 
     def save(self, must_create=False):
         data = dict(
-            data = self._get_session(no_load=must_create),
-            expires = self.get_expiry_age(),
+            data = self.encode(self._get_session(no_load=must_create)),
+            expires = str(int(time.time() + self.get_expiry_age())),
         )
         if must_create:
             try:
@@ -42,7 +47,7 @@ class SessionStore(SessionBase):
                     raise CreateError()
                 raise
         else:
-            self._turant[self.session_key] = data
+            self._tyrant[self.session_key] = data
 
     def exists(self, session_key):
         return bool(self._tyrant.get(session_key))
