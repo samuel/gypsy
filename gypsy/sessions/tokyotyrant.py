@@ -8,7 +8,7 @@ class SessionStore(SessionBase):
     A Tokyo Tyrant based session store.
     """
     def __init__(self, session_key=None):
-        self._tyrant = pytyrant.PyTableTyrant.open(settings.TT_HOST, settings.TT_PORT)
+        self._tyrant = pytyrant.PyTableTyrant.open(*settings.SESSIONS_TT_ADDR)
         super(SessionStore, self).__init__(session_key)
 
     def load(self):
