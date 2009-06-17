@@ -1,5 +1,4 @@
 import memcache
-import cPickle as pickle
 from django.conf import settings
 from django.contrib.sessions.backends.base import SessionBase, CreateError
 
@@ -7,7 +6,7 @@ DEFAULT_PORT = 21201
 
 class SessionStore(SessionBase):
     """
-    A cache-based session store.
+    A memcachedb based session store.
     """
     def __init__(self, session_key=None):
         # memcachedb uses a different default port than memcache. So, if the
