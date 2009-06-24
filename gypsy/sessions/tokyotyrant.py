@@ -1,6 +1,7 @@
 import time
 import pytyrant
 from django.conf import settings
+from django.core.exceptions import SuspiciousOperation
 from django.contrib.sessions.backends.base import SessionBase, CreateError
 
 class SessionStore(SessionBase):
@@ -20,8 +21,11 @@ class SessionStore(SessionBase):
 
         if int(session_data['expires']) < time.time():
             return {}
-            
-        return self.decode(session_data['data'])
+
+        try:
+            return self.decode(session_data['data'])
+        except SuspiciousOperation:
+            return {}
 
     def create(self):
         while True:
