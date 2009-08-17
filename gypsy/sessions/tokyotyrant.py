@@ -65,3 +65,9 @@ class SessionStore(SessionBase):
             del self._tyrant[session_key]
         except KeyError:
             pass
+
+    def clean(self):
+        q = pytyrant.Query(self._tyrant)
+        q = q.filter(expires__numle=str(int(time.time())))
+        for x in q:
+            del self._tyrant[x]
