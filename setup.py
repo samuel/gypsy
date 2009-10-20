@@ -3,6 +3,8 @@
 import os
 from distutils.core import setup
 
+from gypsy import __version__
+
 # Borrowed from Django:
 
 def fullsplit(path, result=None):
@@ -38,7 +40,7 @@ for dirpath, dirnames, filenames in os.walk(gypsy_dir):
 
 setup(
     name = 'gypsy',
-    version = '1.2.3',
+    version = __version__,
     description = 'Django extensions by Lefora',
     author = 'Lefora',
     author_email = 'samuel@lefora.com',

@@ -221,11 +221,17 @@ class S3Storage(Storage):
             else:
                 url = "%s://%s/%s/%s" % (
                     self.conn.protocol,
-                    self.conn.server_name,
-                    self.bucket_name, quote(name.encode('utf-8')))
+                    force_string(self.conn.server_name),
+                    force_string(self.bucket_name),
+                    quote(name.encode('utf-8')))
                 url = url.replace('https://', 'http://').replace(':443/', '/')
         if url and url.startswith('http://'):
             url = url.replace(':80/', '/')
         elif url and url.startswith('https://'):
             url = url.replace(':443/', '/')
         return url
+
+def force_string(v):
+    if hasattr(v, '__call__'):
+        return v()
+    return v
